@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         graph.viewport.setMinY(1.0)
         graph.viewport.setMaxY(150.0)
 
-        start_btn.setOnClickListener() {
+        start_btn.setOnClickListener {
             val intent = Intent(this, SecondActivy::class.java)
             startActivity(intent)
         }

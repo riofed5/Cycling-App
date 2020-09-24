@@ -10,7 +10,7 @@
 
     <com.jjoe64.graphview.GraphView
         android:id="@+id/graph"
-        android:layout_width="379dp"
+        android:layout_width="0dp"
         android:layout_height="284dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"

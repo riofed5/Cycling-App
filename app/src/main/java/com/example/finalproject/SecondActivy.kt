@@ -25,20 +25,18 @@ class SecondActivy : AppCompatActivity() {
         }
     }
 
-    fun showFragmentOne(){
+    private fun showFragmentOne(){
        val transaction = manager.beginTransaction()
         val fragment = FragmentOne()
         transaction.replace(R.id.fragment_holder, fragment)
-        transaction.addToBackStack(null)
         transaction.commit()
         isFragmentOneLoaded = true
     }
 
-    fun showFragmentTwo(){
+    private fun showFragmentTwo(){
         val transaction = manager.beginTransaction()
         val fragment = FragmentTwo()
         transaction.replace(R.id.fragment_holder, fragment)
-        transaction.addToBackStack(null)
         transaction.commit()
         isFragmentOneLoaded = false
     }
