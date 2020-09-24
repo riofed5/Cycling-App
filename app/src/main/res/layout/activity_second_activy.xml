@@ -11,7 +11,7 @@
         android:id="@+id/changFrag_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show Result"
+        android:text="Display Map"
         android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.64"

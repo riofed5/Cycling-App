@@ -34,6 +34,7 @@ class SecondActivy : AppCompatActivity() {
     }
 
     private fun showFragmentTwo(){
+        changFrag_btn.text = "Display Data"
         val transaction = manager.beginTransaction()
         val fragment = FragmentTwo()
         transaction.replace(R.id.fragment_holder, fragment)

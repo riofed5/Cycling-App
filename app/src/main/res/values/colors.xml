@@ -3,6 +3,6 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="colorBtn">#93D3C4</color>
-
+    <color name="color_start_Btn">#93D3C4</color>
+    <color name="color_stop_Btn">#FF0000</color>
 </resources>
