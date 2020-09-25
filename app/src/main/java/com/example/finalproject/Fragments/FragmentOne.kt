@@ -1,6 +1,7 @@
 package com.example.finalproject.Fragments
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +32,7 @@ class FragmentOne : Fragment(){
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        button.setOnClickListener(){
+        start_stop_button.setOnClickListener(){
             if(!isRunning){
                 handleStartBtn()
             }else{
@@ -39,19 +40,32 @@ class FragmentOne : Fragment(){
             }
         }
 
+        finish_button.setOnClickListener(){
+            handleFinsihBtn()
+        }
     }
 
     private fun handleStartBtn(){
-        button.text = "Stop"
-        button.setBackgroundColor(resources.getColor(R.color.color_stop_Btn))
+        start_stop_button.text = "Pause"
+        start_stop_button.setBackgroundColor(resources.getColor(R.color.color_stop_Btn))
+        finish_button.isEnabled = true
+        finish_button.setBackgroundColor(resources.getColor(R.color.color_finish_Btn))
+
         chronometer.start()
         isRunning = true
     }
 
     private fun handleStopBtn(){
-        button.text = "Start"
-        button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
+        start_stop_button.text = "Start"
+        start_stop_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
         chronometer.stop()
+        isRunning = false
+    }
+
+    private fun handleFinsihBtn(){
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.stop()
+        finish_button.isEnabled = false
         isRunning = false
     }
 }

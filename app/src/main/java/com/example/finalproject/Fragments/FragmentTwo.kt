@@ -37,7 +37,7 @@ class FragmentTwo : Fragment() {
 
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
-        map.controller.setZoom(9.0)
+        map.controller.setZoom(15.0)
 
         map.controller.setCenter(GeoPoint(60.208010, 24.662800))
         val startPoint = GeoPoint(60.208010, 24.662800)

@@ -64,7 +64,7 @@
             <TextView
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:text="Avg. Velocity (Km/h) "
+                android:text="Avg. Speed (Km/h) "
                 android:textSize="20dp" />
 
             <TextView
@@ -84,7 +84,7 @@
             <TextView
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:text="Top record Velocity (Km/h)"
+                android:text="Top Speed (Km/h)"
                 android:textSize="20dp" />
 
             <TextView
