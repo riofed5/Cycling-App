@@ -1,9 +1,14 @@
 package com.example.finalproject.Fragments
 
+import android.content.Context.LOCATION_SERVICE
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.example.finalproject.R
@@ -14,7 +19,9 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 
 
-class FragmentTwo : Fragment() {
+class FragmentTwo : Fragment(), LocationListener {
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,6 +46,7 @@ class FragmentTwo : Fragment() {
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
 
+
         map.controller.setCenter(GeoPoint(60.208010, 24.662800))
         val startPoint = GeoPoint(60.208010, 24.662800)
 
@@ -46,6 +54,14 @@ class FragmentTwo : Fragment() {
         startMarker.position = startPoint
         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         map.overlays.add(startMarker)
+    }
 
+    override fun onLocationChanged(location: Location) {
+        val lat = location.latitude
+        val lng = location.longitude
+        val gpt = GeoPoint(lat, lng)
+        map.controller.setCenter(gpt)
     }
 }
+
+
