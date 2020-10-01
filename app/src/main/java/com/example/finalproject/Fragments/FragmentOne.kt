@@ -44,7 +44,7 @@ class FragmentOne : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         start_stop_button.setOnClickListener() {
-            val acceleromterSensorListener: SensorEventListener = object : SensorEventListener {
+            val accelerometerSensorListener: SensorEventListener = object : SensorEventListener {
                 override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
                 }
 
@@ -52,11 +52,11 @@ class FragmentOne : Fragment() {
                     if (event.sensor?.type != Sensor.TYPE_LINEAR_ACCELERATION) return
                     var avrgSpeed= 0.0
                     var howMany = 1
-                    if (event != null && isRunning) {
+                    if (isRunning) {
                         howMany++
                         val magnitude = sqrt((event.values[0] * event.values[0] + event.values[1] * event.values[1] + event.values[2] * event.values[2]))
-                        avrgSpeed = avrgSpeed + (magnitude - avrgSpeed)/howMany
-                        Log.d("Kqua", "${avrgSpeed}")
+                        avrgSpeed += (magnitude - avrgSpeed) / howMany
+                        Log.d("Kqua", "$avrgSpeed")
                         speedTxt.text = magnitude.toString()
                     } else {
                         Log.d("Nhan", "No sensor founded")
@@ -68,7 +68,7 @@ class FragmentOne : Fragment() {
                 handleStartBtn()
                 if (sensorAccelerometer != null) {
                     sensorManager.registerListener(
-                        acceleromterSensorListener,
+                        accelerometerSensorListener,
                         sensorAccelerometer,
                         SensorManager.SENSOR_DELAY_NORMAL
                     )
@@ -80,7 +80,7 @@ class FragmentOne : Fragment() {
         }
 
         finish_button.setOnClickListener() {
-            handleFinsihBtn()
+            handleFinishBtn()
         }
     }
 
@@ -100,9 +100,9 @@ class FragmentOne : Fragment() {
         chronometer.stop()
     }
 
-    private fun handleFinsihBtn() {
+    private fun handleFinishBtn() {
         isRunning = false
-        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.base = SystemClock.elapsedRealtime();
         chronometer.stop()
         finish_button.isEnabled = false
     }

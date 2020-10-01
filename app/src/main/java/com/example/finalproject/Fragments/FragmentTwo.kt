@@ -4,39 +4,45 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
-import com.example.finalproject.R
 import com.google.android.gms.location.*
 import kotlinx.android.synthetic.main.fragment_second.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.osmdroid.bonuspack.routing.MapQuestRoadManager
+import org.osmdroid.bonuspack.routing.Road
+import org.osmdroid.bonuspack.routing.RoadManager
+import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
+import kotlin.math.abs
 
 
 class FragmentTwo : Fragment() {
-
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private val waypoints = ArrayList<GeoPoint>()
+    private lateinit var roadManager: RoadManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_second, container, false)
+        return inflater.inflate(com.example.finalproject.R.layout.fragment_second, container, false)
 
     }
 
@@ -71,6 +77,8 @@ class FragmentTwo : Fragment() {
             )
         }
 
+        roadManager = MapQuestRoadManager("t2CFU4eZSNbbgtJfBsp1Lz7NW3lcaPXi")
+        roadManager.addRequestOption("routeType=bicycle")
         //Initialize Map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
@@ -81,8 +89,9 @@ class FragmentTwo : Fragment() {
                 val lat = task.result!!.latitude
                 val lng = task.result!!.longitude
 
-                map.controller.setCenter(GeoPoint(lat, lng))
-
+                val startPoint = GeoPoint(lat, lng)
+                map.controller.setCenter(startPoint)
+                waypoints.add(startPoint)
                 val initPoint = GeoPoint(lat, lng)
                 val marker = Marker(map)
                 marker.position = initPoint
@@ -92,9 +101,9 @@ class FragmentTwo : Fragment() {
             }
         }
 
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(1000);
+        locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 1000
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -102,20 +111,51 @@ class FragmentTwo : Fragment() {
                     if (location != null) {
                         val lat = location.latitude
                         val lng = location.longitude
-
-                        map.controller.setCenter(GeoPoint(lat, lng))
-
+                        val lastAddedLocation = waypoints[waypoints.lastIndex]
+                        Log.d("CurrentLat", lastAddedLocation.latitude.toString())
+                        Log.d("CurrentLong", lastAddedLocation.longitude.toString())
+                        Log.d("NewLat", lat.toString())
+                        Log.d("NewLong", lng.toString())
+                        val latProximity = abs(lastAddedLocation.latitude - lat) <= 0.0001
+                        val lngProximity = abs(lastAddedLocation.longitude - lng) <= 0.0001
+                        if (latProximity && lngProximity) {
+                            return
+                        }
                         val updatedPoint = GeoPoint(lat, lng)
-                        val updatedMarker = Marker(map)
-                        updatedMarker.position = updatedPoint
-                        updatedMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                        map.overlays.add(updatedMarker)
+                        map.controller.setCenter(updatedPoint)
+                        waypoints.add(updatedPoint)
+                        var road: Road?
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            road = getRoad()
+                            for (i in 0 until road!!.mNodes.size) {
+                                val node: RoadNode = road!!.mNodes[i]
+                                val nodeMarker = Marker(map)
+                                nodeMarker.position = node.mLocation
+                                nodeMarker.title = "Step $i"
+                                nodeMarker.snippet = node.mInstructions
+                                nodeMarker.subDescription =
+                                    Road.getLengthDurationText(ctx, node.mLength, node.mDuration)
+                                map.overlays.add(nodeMarker)
+                                val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
+                                map.overlays.add(roadOverlay)
+                            }
+                            map.invalidate()
+                        }
                     }
                 }
             }
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
+
+    suspend fun getRoad(): Road =
+        withContext(Dispatchers.Default) {
+            return@withContext roadManager.getRoad(waypoints)
+        }
 }
 
 
