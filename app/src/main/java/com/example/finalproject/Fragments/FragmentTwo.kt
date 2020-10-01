@@ -60,6 +60,7 @@ class FragmentTwo : Fragment() {
         //Initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(ctx)
 
+        //Permission
         if (ContextCompat.checkSelfPermission(
                 ctx,
                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -79,6 +80,7 @@ class FragmentTwo : Fragment() {
 
         roadManager = MapQuestRoadManager("t2CFU4eZSNbbgtJfBsp1Lz7NW3lcaPXi")
         roadManager.addRequestOption("routeType=bicycle")
+
         //Initialize Map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
@@ -101,9 +103,12 @@ class FragmentTwo : Fragment() {
             }
         }
 
+        //Set up location request
         locationRequest = LocationRequest.create()
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationRequest.interval = 1000
+
+        //Set up location callback
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -145,6 +150,8 @@ class FragmentTwo : Fragment() {
                 }
             }
         }
+
+        //Update location continuously
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
