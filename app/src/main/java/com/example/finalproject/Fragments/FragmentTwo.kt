@@ -112,10 +112,6 @@ class FragmentTwo : Fragment() {
                         val lat = location.latitude
                         val lng = location.longitude
                         val lastAddedLocation = waypoints[waypoints.lastIndex]
-                        Log.d("CurrentLat", lastAddedLocation.latitude.toString())
-                        Log.d("CurrentLong", lastAddedLocation.longitude.toString())
-                        Log.d("NewLat", lat.toString())
-                        Log.d("NewLong", lng.toString())
                         val latProximity = abs(lastAddedLocation.latitude - lat) <= 0.0001
                         val lngProximity = abs(lastAddedLocation.longitude - lng) <= 0.0001
                         if (latProximity && lngProximity) {
@@ -127,18 +123,8 @@ class FragmentTwo : Fragment() {
                         var road: Road?
                         lifecycleScope.launch(Dispatchers.Default) {
                             road = getRoad()
-                            for (i in 0 until road!!.mNodes.size) {
-                                val node: RoadNode = road!!.mNodes[i]
-                                val nodeMarker = Marker(map)
-                                nodeMarker.position = node.mLocation
-                                nodeMarker.title = "Step $i"
-                                nodeMarker.snippet = node.mInstructions
-                                nodeMarker.subDescription =
-                                    Road.getLengthDurationText(ctx, node.mLength, node.mDuration)
-                                map.overlays.add(nodeMarker)
-                                val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
-                                map.overlays.add(roadOverlay)
-                            }
+                            val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
+                            map.overlays.add(roadOverlay)
                             map.invalidate()
                         }
                     }
