@@ -1,17 +1,18 @@
 package com.example.finalproject.Fragments
 
-import android.content.Context.LOCATION_SERVICE
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.example.finalproject.R
+import com.google.android.gms.location.*
 import kotlinx.android.synthetic.main.fragment_second.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -19,8 +20,16 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 
 
-class FragmentTwo : Fragment(), LocationListener {
+class FragmentTwo : Fragment() {
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,26 +51,72 @@ class FragmentTwo : Fragment(), LocationListener {
             PreferenceManager.getDefaultSharedPreferences(ctx)
         )
 
+        //Initialize fused location client
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(ctx)
+
+        if (ContextCompat.checkSelfPermission(
+                ctx,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                ctx,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(), arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ), 1
+            )
+        }
+
+        //Initialize Map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
 
+        fusedLocationClient.lastLocation?.addOnCompleteListener(requireActivity()) { task ->
+            if (task.isSuccessful && task.result != null) {
+                val lat = task.result!!.latitude
+                val lng = task.result!!.longitude
 
-        map.controller.setCenter(GeoPoint(60.208010, 24.662800))
-        val startPoint = GeoPoint(60.208010, 24.662800)
+                map.controller.setCenter(GeoPoint(lat, lng))
 
-        val startMarker = Marker(map)
-        startMarker.position = startPoint
-        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        map.overlays.add(startMarker)
-    }
+                val initPoint = GeoPoint(lat, lng)
+                val marker = Marker(map)
+                marker.position = initPoint
 
-    override fun onLocationChanged(location: Location) {
-        val lat = location.latitude
-        val lng = location.longitude
-        val gpt = GeoPoint(lat, lng)
-        map.controller.setCenter(gpt)
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                map.overlays.add(marker)
+            }
+        }
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000);
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations) {
+                    if (location != null) {
+                        val lat = location.latitude
+                        val lng = location.longitude
+
+                        map.controller.setCenter(GeoPoint(lat, lng))
+
+                        val updatedPoint = GeoPoint(lat, lng)
+                        val updatedMarker = Marker(map)
+                        updatedMarker.position = updatedPoint
+                        updatedMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        map.overlays.add(updatedMarker)
+                    }
+                }
+            }
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
 }
+
 
 
