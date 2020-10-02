@@ -23,6 +23,8 @@ class FragmentOne : Fragment() {
     private var isRunning: Boolean = false
     private var timeCycling = 0
     private var timeWhenStopped: Long = 0
+    private var sensorDataCount: Int = 0
+    private var averageSpeed: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +32,6 @@ class FragmentOne : Fragment() {
         //Initialize sensor Manager
         sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-
     }
 
     override fun onCreateView(
@@ -51,20 +52,21 @@ class FragmentOne : Fragment() {
             val accelerometerSensorListener: SensorEventListener = object : SensorEventListener {
                 override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
                 }
+
                 override fun onSensorChanged(event: SensorEvent) {
                     if (event.sensor?.type != Sensor.TYPE_LINEAR_ACCELERATION) return
-                    var avrgSpeed = 0.0
-                    var howMany = 1
                     if (isRunning) {
-                        howMany++
-
+                        sensorDataCount++
                         //Get current speed
                         val magnitude =
                             sqrt((event.values[0] * event.values[0] + event.values[1] * event.values[1] + event.values[2] * event.values[2]))
 
                         //Get average Speed to calculate total distance
-                        avrgSpeed += (magnitude - avrgSpeed) / howMany
-                        Log.d("Kqua", "$avrgSpeed")
+//                        averageSpeed -= averageSpeed / sensorDataCount
+//                        averageSpeed += magnitude / sensorDataCount
+                        averageSpeed =
+                            (averageSpeed * sensorDataCount + magnitude) / (sensorDataCount + 1)
+                        Log.d("Kqua", "$averageSpeed")
 
                         //Update current Speed to UI
                         speedTxt.text = magnitude.toString()
@@ -107,7 +109,7 @@ class FragmentOne : Fragment() {
         finish_button.setBackgroundColor(resources.getColor(R.color.color_finish_Btn))
 
         //Set up chronometer
-        chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped)
+        chronometer.base = SystemClock.elapsedRealtime() + timeWhenStopped
         chronometer.start()
     }
 
@@ -119,7 +121,7 @@ class FragmentOne : Fragment() {
         start_pause_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
 
         //Set up chronometer
-        timeWhenStopped = chronometer.getBase() - SystemClock.elapsedRealtime();
+        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime();
         chronometer.stop()
 
         //Calculate timeCycling
@@ -130,14 +132,14 @@ class FragmentOne : Fragment() {
         isRunning = false
 
         //Set up chronometer
-        timeWhenStopped = chronometer.getBase() - SystemClock.elapsedRealtime();
+        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime();
         chronometer.stop()
 
         //Calculate timeCycling
         timeCycling = calculateElapsedTime()
 
         //Set up chronometer
-        chronometer.setBase(SystemClock.elapsedRealtime())
+        chronometer.base = SystemClock.elapsedRealtime()
         timeWhenStopped = 0
 
         //Disable Finish button
@@ -149,7 +151,7 @@ class FragmentOne : Fragment() {
         var stoppedMilliseconds = 0
 
         //Get Text from chronometer
-        val chronoText: String = chronometer.getText().toString()
+        val chronoText: String = chronometer.text.toString()
         val array = chronoText.split(":".toRegex()).toTypedArray()
 
         if (array.size == 2) {
@@ -159,7 +161,7 @@ class FragmentOne : Fragment() {
             stoppedMilliseconds =
                 array[0].toInt() * 60 * 60 + array[1].toInt() * 60 + array[2].toInt()
         }
-        Log.d("Time", "${stoppedMilliseconds} sec")
+        Log.d("Time", "$stoppedMilliseconds sec")
         return stoppedMilliseconds
     }
 }
