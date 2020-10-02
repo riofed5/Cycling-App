@@ -20,13 +20,14 @@ class FragmentOne : Fragment() {
 
     private lateinit var sensorManager: SensorManager
     private var sensorAccelerometer: Sensor? = null
-
     private var isRunning: Boolean = false
-
+    private var timeCycling = 0
+    private var timeWhenStopped: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //Initialize sensor Manager
         sensorManager = activity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
 
@@ -43,23 +44,32 @@ class FragmentOne : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        start_stop_button.setOnClickListener() {
+        //Btn Start&PauseFinish handle onClick
+
+        start_pause_button.setOnClickListener() {
+            //Initialize accelerometer sensor
             val accelerometerSensorListener: SensorEventListener = object : SensorEventListener {
                 override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
                 }
-
                 override fun onSensorChanged(event: SensorEvent) {
                     if (event.sensor?.type != Sensor.TYPE_LINEAR_ACCELERATION) return
-                    var avrgSpeed= 0.0
+                    var avrgSpeed = 0.0
                     var howMany = 1
                     if (isRunning) {
                         howMany++
-                        val magnitude = sqrt((event.values[0] * event.values[0] + event.values[1] * event.values[1] + event.values[2] * event.values[2]))
+
+                        //Get current speed
+                        val magnitude =
+                            sqrt((event.values[0] * event.values[0] + event.values[1] * event.values[1] + event.values[2] * event.values[2]))
+
+                        //Get average Speed to calculate total distance
                         avrgSpeed += (magnitude - avrgSpeed) / howMany
                         Log.d("Kqua", "$avrgSpeed")
+
+                        //Update current Speed to UI
                         speedTxt.text = magnitude.toString()
                     } else {
-                        Log.d("Nhan", "No sensor founded")
+                        Log.d("Error", "No sensor founded")
                     }
                 }
             }
@@ -79,31 +89,77 @@ class FragmentOne : Fragment() {
             }
         }
 
+        //Btn Finish handle onClick
         finish_button.setOnClickListener() {
             handleFinishBtn()
         }
     }
 
     private fun handleStartBtn() {
-        start_stop_button.text = "Pause"
-        start_stop_button.setBackgroundColor(resources.getColor(R.color.color_stop_Btn))
+        isRunning = true
+
+        //Change state button from Start to Pause
+        start_pause_button.text = "Pause"
+        start_pause_button.setBackgroundColor(resources.getColor(R.color.color_stop_Btn))
+
+        //Enable Finish button
         finish_button.isEnabled = true
         finish_button.setBackgroundColor(resources.getColor(R.color.color_finish_Btn))
+
+        //Set up chronometer
+        chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped)
         chronometer.start()
-        isRunning = true
     }
 
     private fun handleStopBtn() {
         isRunning = false
-        start_stop_button.text = "Start"
-        start_stop_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
+
+        //Change state button from Pause to Start
+        start_pause_button.text = "Start"
+        start_pause_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
+
+        //Set up chronometer
+        timeWhenStopped = chronometer.getBase() - SystemClock.elapsedRealtime();
         chronometer.stop()
+
+        //Calculate timeCycling
+        timeCycling = calculateElapsedTime()
     }
 
     private fun handleFinishBtn() {
         isRunning = false
-        chronometer.base = SystemClock.elapsedRealtime();
+
+        //Set up chronometer
+        timeWhenStopped = chronometer.getBase() - SystemClock.elapsedRealtime();
         chronometer.stop()
+
+        //Calculate timeCycling
+        timeCycling = calculateElapsedTime()
+
+        //Set up chronometer
+        chronometer.setBase(SystemClock.elapsedRealtime())
+        timeWhenStopped = 0
+
+        //Disable Finish button
         finish_button.isEnabled = false
+        finish_button.setBackgroundColor(resources.getColor(R.color.color_disabled_Btn))
+    }
+
+    private fun calculateElapsedTime(): Int {
+        var stoppedMilliseconds = 0
+
+        //Get Text from chronometer
+        val chronoText: String = chronometer.getText().toString()
+        val array = chronoText.split(":".toRegex()).toTypedArray()
+
+        if (array.size == 2) {
+            stoppedMilliseconds = (array[0].toInt() * 60
+                    + array[1].toInt())
+        } else if (array.size == 3) {
+            stoppedMilliseconds =
+                array[0].toInt() * 60 * 60 + array[1].toInt() * 60 + array[2].toInt()
+        }
+        Log.d("Time", "${stoppedMilliseconds} sec")
+        return stoppedMilliseconds
     }
 }

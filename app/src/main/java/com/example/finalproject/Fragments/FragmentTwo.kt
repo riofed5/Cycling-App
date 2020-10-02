@@ -62,6 +62,7 @@ class FragmentTwo : Fragment() {
 
         roadManager = MapQuestRoadManager("t2CFU4eZSNbbgtJfBsp1Lz7NW3lcaPXi")
         roadManager.addRequestOption("routeType=bicycle")
+
         //Initialize Map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
