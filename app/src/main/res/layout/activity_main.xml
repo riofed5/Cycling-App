@@ -48,6 +48,7 @@
                 android:textSize="20dp" />
 
             <TextView
+                android:id="@+id/travelDistanceText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="11.375"
@@ -68,6 +69,7 @@
                 android:textSize="20dp" />
 
             <TextView
+                android:id="@+id/averageSpeedText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="30"
@@ -88,6 +90,7 @@
                 android:textSize="20dp" />
 
             <TextView
+                android:id="@+id/highestSpeedText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="45"

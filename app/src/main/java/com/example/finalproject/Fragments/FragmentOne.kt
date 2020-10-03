@@ -12,12 +12,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.finalproject.CyclingData
+import com.example.finalproject.CyclingDatabase
 import com.example.finalproject.R
 import kotlinx.android.synthetic.main.fragment_first.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.math.sqrt
 
 class FragmentOne : Fragment() {
-
     private lateinit var sensorManager: SensorManager
     private var sensorAccelerometer: Sensor? = null
     private var isRunning: Boolean = false
@@ -25,6 +29,8 @@ class FragmentOne : Fragment() {
     private var timeWhenStopped: Long = 0
     private var sensorDataCount: Int = 0
     private var averageSpeed: Double = 0.0
+    private var highestSpeed: Double = 0.0
+    private val db by lazy { CyclingDatabase.get(requireContext()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +52,7 @@ class FragmentOne : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         //Btn Start&PauseFinish handle onClick
-
-        start_pause_button.setOnClickListener() {
+        start_pause_button.setOnClickListener {
             //Initialize accelerometer sensor
             val accelerometerSensorListener: SensorEventListener = object : SensorEventListener {
                 override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -64,6 +69,9 @@ class FragmentOne : Fragment() {
                         //Get average Speed to calculate total distance
 //                        averageSpeed -= averageSpeed / sensorDataCount
 //                        averageSpeed += magnitude / sensorDataCount
+                        if (magnitude > highestSpeed) {
+                            highestSpeed = magnitude.toDouble()
+                        }
                         averageSpeed =
                             (averageSpeed * sensorDataCount + magnitude) / (sensorDataCount + 1)
                         Log.d("Kqua", "$averageSpeed")
@@ -92,7 +100,7 @@ class FragmentOne : Fragment() {
         }
 
         //Btn Finish handle onClick
-        finish_button.setOnClickListener() {
+        finish_button.setOnClickListener {
             handleFinishBtn()
         }
     }
@@ -121,18 +129,20 @@ class FragmentOne : Fragment() {
         start_pause_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
 
         //Set up chronometer
-        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime();
+        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime()
         chronometer.stop()
 
         //Calculate timeCycling
         timeCycling = calculateElapsedTime()
+
+        saveCyclingData()
     }
 
     private fun handleFinishBtn() {
         isRunning = false
 
         //Set up chronometer
-        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime();
+        timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime()
         chronometer.stop()
 
         //Calculate timeCycling
@@ -145,6 +155,25 @@ class FragmentOne : Fragment() {
         //Disable Finish button
         finish_button.isEnabled = false
         finish_button.setBackgroundColor(resources.getColor(R.color.color_disabled_Btn))
+
+        saveCyclingData()
+    }
+
+    private fun saveCyclingData() {
+        val aveSpeedToSave = "%.2f".format(averageSpeed * 3.6).toFloat()
+        val highSpeedToSave = "%.2f".format(highestSpeed * 3.6).toFloat()
+        val timeCyclingToSave = timeCycling / 3600f
+        val distanceToSave = "%.2f".format(averageSpeed * 3.6 * timeCyclingToSave).toFloat()
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val currentDate = calendar.time
+        GlobalScope.launch {
+            val previousDistance = db.cyclingDataDao().getDateData(currentDate.time)?.distanceTraveled ?: 0f
+            db.cyclingDataDao().insert(CyclingData(currentDate.time, currentDate.time, aveSpeedToSave, highSpeedToSave, previousDistance + distanceToSave))
+        }
     }
 
     private fun calculateElapsedTime(): Int {
