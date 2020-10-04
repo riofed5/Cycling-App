@@ -14,11 +14,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.finalproject.CyclingData
 import com.example.finalproject.CyclingDatabase
+import com.example.finalproject.DateHelper
 import com.example.finalproject.R
 import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.math.sqrt
 
 class FragmentOne : Fragment() {
@@ -109,12 +109,12 @@ class FragmentOne : Fragment() {
         isRunning = true
 
         //Change state button from Start to Pause
-        start_pause_button.text = "Pause"
-        start_pause_button.setBackgroundColor(resources.getColor(R.color.color_stop_Btn))
+        start_pause_button.text = getString(R.string.pause)
+        start_pause_button.setBackgroundColor(requireActivity().getColor(R.color.color_stop_Btn))
 
         //Enable Finish button
         finish_button.isEnabled = true
-        finish_button.setBackgroundColor(resources.getColor(R.color.color_finish_Btn))
+        finish_button.setBackgroundColor(requireActivity().getColor(R.color.color_finish_Btn))
 
         //Set up chronometer
         chronometer.base = SystemClock.elapsedRealtime() + timeWhenStopped
@@ -125,8 +125,8 @@ class FragmentOne : Fragment() {
         isRunning = false
 
         //Change state button from Pause to Start
-        start_pause_button.text = "Start"
-        start_pause_button.setBackgroundColor(resources.getColor(R.color.color_start_Btn))
+        start_pause_button.text = getString(R.string.start)
+        start_pause_button.setBackgroundColor(requireActivity().getColor(R.color.color_start_Btn))
 
         //Set up chronometer
         timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime()
@@ -154,7 +154,7 @@ class FragmentOne : Fragment() {
 
         //Disable Finish button
         finish_button.isEnabled = false
-        finish_button.setBackgroundColor(resources.getColor(R.color.color_disabled_Btn))
+        finish_button.setBackgroundColor(requireActivity().getColor(R.color.color_disabled_Btn))
 
         saveCyclingData()
     }
@@ -163,16 +163,32 @@ class FragmentOne : Fragment() {
         val aveSpeedToSave = "%.2f".format(averageSpeed * 3.6).toFloat()
         val highSpeedToSave = "%.2f".format(highestSpeed * 3.6).toFloat()
         val timeCyclingToSave = timeCycling / 3600f
-        val distanceToSave = "%.2f".format(averageSpeed * 3.6 * timeCyclingToSave).toFloat()
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val currentDate = calendar.time
+        val distanceToSave = averageSpeed * 3.6 * timeCyclingToSave
+        val currentDate = DateHelper.getCurrentDateResetTime()
         GlobalScope.launch {
-            val previousDistance = db.cyclingDataDao().getDateData(currentDate.time)?.distanceTraveled ?: 0f
-            db.cyclingDataDao().insert(CyclingData(currentDate.time, currentDate.time, aveSpeedToSave, highSpeedToSave, previousDistance + distanceToSave))
+            val previousDistance =
+                db.cyclingDataDao().getDateData(currentDate.time)?.distanceTraveled ?: 0f
+            if (previousDistance == 0f) {
+                db.cyclingDataDao().insert(
+                    CyclingData(
+                        currentDate.time,
+                        currentDate.time,
+                        aveSpeedToSave,
+                        highSpeedToSave,
+                        distanceToSave.toFloat()
+                    )
+                )
+                return@launch
+            }
+            db.cyclingDataDao().update(
+                CyclingData(
+                    currentDate.time,
+                    currentDate.time,
+                    aveSpeedToSave,
+                    highSpeedToSave,
+                    (previousDistance + distanceToSave).toFloat()
+                )
+            )
         }
     }
 
