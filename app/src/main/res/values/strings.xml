@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Final Project</string>
+    <string name="pause">Pause</string>
+    <string name="start">Start</string>
+    <string name="distance_title">Distance (kilometers)</string>
+    <string name="ave_speed_title">Avg. speed (km/h)</string>
+    <string name="top_speed_title">Top speed (km/h)</string>
+    <string name="start_training">Start training</string>
+    <string name="default_data_value">0.0</string>
 </resources>

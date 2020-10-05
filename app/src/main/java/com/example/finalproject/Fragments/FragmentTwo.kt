@@ -1,10 +1,11 @@
 package com.example.finalproject.Fragments
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,6 @@ import kotlinx.coroutines.withContext
 import org.osmdroid.bonuspack.routing.MapQuestRoadManager
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.bonuspack.routing.RoadManager
-import org.osmdroid.bonuspack.routing.RoadNode
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -32,10 +32,11 @@ import kotlin.math.abs
 
 class FragmentTwo : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private val waypoints = ArrayList<GeoPoint>()
     private lateinit var roadManager: RoadManager
+    private var requestingLocationUpdates: Boolean = false
+    private lateinit var ctx: Context
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,13 +44,12 @@ class FragmentTwo : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(com.example.finalproject.R.layout.fragment_second, container, false)
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val ctx = requireActivity().applicationContext
+        ctx = requireActivity().applicationContext
         //important! set your user agent to prevent getting banned
         //from the osm servers
         Configuration.getInstance().load(
@@ -60,24 +60,6 @@ class FragmentTwo : Fragment() {
         //Initialize fused location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(ctx)
 
-        //Permission
-        if (ContextCompat.checkSelfPermission(
-                ctx,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-                ctx,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(), arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ), 1
-            )
-        }
-
         roadManager = MapQuestRoadManager("t2CFU4eZSNbbgtJfBsp1Lz7NW3lcaPXi")
         roadManager.addRequestOption("routeType=bicycle")
 
@@ -85,6 +67,9 @@ class FragmentTwo : Fragment() {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
+
+        checkLocationPermission()
+        checkBackgroundLocationPermission()
 
         fusedLocationClient.lastLocation?.addOnCompleteListener(requireActivity()) { task ->
             if (task.isSuccessful && task.result != null) {
@@ -103,12 +88,6 @@ class FragmentTwo : Fragment() {
             }
         }
 
-        //Set up location request
-        locationRequest = LocationRequest.create()
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        locationRequest.interval = 1000
-
-        //Set up location callback
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -126,7 +105,7 @@ class FragmentTwo : Fragment() {
                         map.controller.setCenter(updatedPoint)
                         waypoints.add(updatedPoint)
                         var road: Road?
-                        lifecycleScope.launch(Dispatchers.Default) {
+                        lifecycleScope.launch(Dispatchers.IO) {
                             road = getRoad()
                             val roadOverlay: Polyline = RoadManager.buildRoadOverlay(road)
                             map.overlays.add(roadOverlay)
@@ -136,8 +115,21 @@ class FragmentTwo : Fragment() {
                 }
             }
         }
+    }
 
-        //Update location continuously
+    override fun onResume() {
+        super.onResume()
+        map.onResume()
+        if (!requestingLocationUpdates) startLocationUpdates()
+    }
+
+    private fun startLocationUpdates() {
+        checkLocationPermission()
+        requestingLocationUpdates = true
+        val locationRequest = LocationRequest.create().apply {
+            interval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
             locationCallback,
@@ -145,8 +137,55 @@ class FragmentTwo : Fragment() {
         )
     }
 
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
+        map.onPause()
+    }
+
+    private fun stopLocationUpdates() {
+        requestingLocationUpdates = false
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    private fun checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                ctx,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                ctx,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 0
+            )
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0
+            )
+        }
+    }
+
+    private fun checkBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        if (ContextCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), 0
+            )
+        }
+    }
+
     suspend fun getRoad(): Road =
-        withContext(Dispatchers.Default) {
+        withContext(Dispatchers.IO) {
             return@withContext roadManager.getRoad(waypoints)
         }
 }
