@@ -9,4 +9,8 @@
     <string name="default_data_value">0.0</string>
     <string name="display_data">Speed and Time</string>
     <string name="display_map">Tracking location</string>
+    <string name="today_data">Today\'s stats</string>
+    <string name="speed_title">Speed (m/s)</string>
+    <string name="time_title">Time</string>
+    <string name="finish_btn">Finish</string>
 </resources>

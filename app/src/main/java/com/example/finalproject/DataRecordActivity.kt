@@ -1,12 +1,12 @@
 package com.example.finalproject
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.finalproject.Fragments.FragmentOne
-import com.example.finalproject.Fragments.FragmentTwo
+import androidx.appcompat.app.AppCompatActivity
+import com.example.finalproject.Fragments.FragmentMap
+import com.example.finalproject.Fragments.FragmentSensorData
 import kotlinx.android.synthetic.main.activity_second_activy.*
 
-class SecondActivy : AppCompatActivity() {
+class DataRecordActivity : AppCompatActivity() {
 
     private var isFragmentOneLoaded = true
     private val manager = supportFragmentManager
@@ -16,7 +16,7 @@ class SecondActivy : AppCompatActivity() {
         setContentView(R.layout.activity_second_activy)
 
         showFragmentOne()
-        changFrag_btn.setOnClickListener() {
+        changFrag_btn.setOnClickListener {
             if (isFragmentOneLoaded) {
                 showFragmentTwo()
             } else {
@@ -28,7 +28,7 @@ class SecondActivy : AppCompatActivity() {
     private fun showFragmentOne() {
         changFrag_btn.text = getString(R.string.display_map)
         val transaction = manager.beginTransaction()
-        val fragment = FragmentOne()
+        val fragment = FragmentSensorData()
         transaction.replace(R.id.fragment_holder, fragment)
         transaction.commit()
         isFragmentOneLoaded = true
@@ -37,7 +37,7 @@ class SecondActivy : AppCompatActivity() {
     private fun showFragmentTwo() {
         changFrag_btn.text = getString(R.string.display_data)
         val transaction = manager.beginTransaction()
-        val fragment = FragmentTwo()
+        val fragment = FragmentMap()
         transaction.replace(R.id.fragment_holder, fragment)
         transaction.commit()
         isFragmentOneLoaded = false

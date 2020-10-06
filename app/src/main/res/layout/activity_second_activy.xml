@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SecondActivy"
-    android:orientation="vertical">
+    android:layout_marginTop="24dp"
+    android:layout_marginBottom="24dp"
+    android:orientation="vertical"
+    tools:context=".DataRecordActivity">
 
     <Button
         android:id="@+id/changFrag_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/display_map"
-        android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.64"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,5 +22,6 @@
     <FrameLayout
         android:id="@+id/fragment_holder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="24dp" />
 </LinearLayout>

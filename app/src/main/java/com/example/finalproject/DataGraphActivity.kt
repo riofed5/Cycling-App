@@ -14,20 +14,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class DataGraphActivity : AppCompatActivity() {
     private val db by lazy { CyclingDatabase.get(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        graph.gridLabelRenderer.horizontalAxisTitle = "Day"
-//        graph.gridLabelRenderer.verticalAxisTitle = "Distance (Km)"
-
         graph.viewport.setMinY(0.0)
         graph.viewport.setMaxY(20.0)
+
+        val currentDate = DateHelper.getCurrentDateResetTime().time
+        graph.viewport.setMinX(currentDate.toDouble())
 
         graph.gridLabelRenderer.labelFormatter = DateAsXAxisLabelFormatter(this)
         graph.gridLabelRenderer.numHorizontalLabels = 3
@@ -35,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         graph.gridLabelRenderer.setHumanRounding(false)
 
         start_btn.setOnClickListener {
-            startActivity(Intent(this, SecondActivy::class.java))
+            startActivity(Intent(this, DataRecordActivity::class.java))
         }
     }
 
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
             val lastDateData = dataList[dataList.lastIndex]
             dataList.forEach {
-                dataPoints.add(DataPoint(Date(it.date), it.distanceTraveled.toDouble()))
+                dataPoints.add(DataPoint(it.date.toDouble(), it.distanceTraveled.toDouble()))
             }
 
             val barGraphSeries = BarGraphSeries(dataPoints.toTypedArray())

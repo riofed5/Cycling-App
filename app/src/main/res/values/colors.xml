@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ffb5a7</color>
-    <color name="colorPrimaryDark">#ffb5a7</color>
-    <color name="colorAccent">#fec89a</color>
-    <color name="color_start_Btn">#fec89a</color>
-    <color name="color_stop_Btn">#FF0000</color>
+    <color name="colorPrimary">#00e676</color>
+    <color name="colorPrimaryDark">#00b248</color>
+    <color name="colorAccent">#66ffa6</color>
+    <color name="color_stop_Btn">#f4511e</color>
     <color name="color_disabled_Btn">#DDDAD7</color>
-    <color name="color_finish_Btn">#e29578</color>
-
 </resources>

@@ -30,7 +30,7 @@ import org.osmdroid.views.overlay.Polyline
 import kotlin.math.abs
 
 
-class FragmentTwo : Fragment() {
+class FragmentMap : Fragment() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private val waypoints = ArrayList<GeoPoint>()

@@ -21,7 +21,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
-class FragmentOne : Fragment()  {
+class FragmentSensorData : Fragment() {
     private lateinit var sensorManager: SensorManager
     private var sensorAccelerometer: Sensor? = null
     private var isRunning: Boolean = false
@@ -117,7 +117,6 @@ class FragmentOne : Fragment()  {
 
         //Enable Finish button
         finish_button.isEnabled = true
-        finish_button.setBackgroundColor(requireActivity().getColor(R.color.color_finish_Btn))
 
         //Set up chronometer
         chronometer.base = SystemClock.elapsedRealtime() + timeWhenStopped
@@ -129,7 +128,6 @@ class FragmentOne : Fragment()  {
 
         //Change state button from Pause to Start
         start_pause_button.text = getString(R.string.start)
-        start_pause_button.setBackgroundColor(requireActivity().getColor(R.color.color_start_Btn))
 
         //Set up chronometer
         timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime()
@@ -143,6 +141,8 @@ class FragmentOne : Fragment()  {
 
     private fun handleFinishBtn() {
         isRunning = false
+
+        start_pause_button.text = getString(R.string.start)
 
         //Set up chronometer
         timeWhenStopped = chronometer.base - SystemClock.elapsedRealtime()
