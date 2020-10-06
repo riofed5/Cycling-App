@@ -12,16 +12,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.finalproject.CyclingData
-import com.example.finalproject.CyclingDatabase
-import com.example.finalproject.DateHelper
+import com.example.finalproject.DataController.CyclingData
+import com.example.finalproject.DataController.CyclingDatabase
+import com.example.finalproject.DataController.DateHelper
 import com.example.finalproject.R
 import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 
-class FragmentOne : Fragment() {
+class FragmentOne : Fragment()  {
     private lateinit var sensorManager: SensorManager
     private var sensorAccelerometer: Sensor? = null
     private var isRunning: Boolean = false
@@ -45,7 +45,10 @@ class FragmentOne : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_first, container, false)
+        val view = inflater.inflate(R.layout.fragment_first, container, false)
+        Log.d("Test","On Create View: ${timeWhenStopped}")
+
+        return view
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -192,6 +195,8 @@ class FragmentOne : Fragment() {
         }
     }
 
+
+
     private fun calculateElapsedTime(): Int {
         var stoppedMilliseconds = 0
 
@@ -209,4 +214,26 @@ class FragmentOne : Fragment() {
         Log.d("Time", "$stoppedMilliseconds sec")
         return stoppedMilliseconds
     }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("Test","On Resume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("Test","On Pause")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("Test","On Destroy View")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d("Test","On Detach")
+
+    }
+
 }

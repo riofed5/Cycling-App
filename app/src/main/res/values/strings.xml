@@ -7,4 +7,6 @@
     <string name="top_speed_title">Top speed (km/h)</string>
     <string name="start_training">Start training</string>
     <string name="default_data_value">0.0</string>
+    <string name="display_data">Speed and Time</string>
+    <string name="display_map">Tracking location</string>
 </resources>

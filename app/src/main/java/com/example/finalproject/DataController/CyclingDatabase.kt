@@ -1,4 +1,4 @@
-package com.example.finalproject
+package com.example.finalproject.DataController
 
 import android.content.Context
 import androidx.room.Database

@@ -1,6 +1,7 @@
-package com.example.finalproject
+package com.example.finalproject.DataController
 
 import androidx.room.*
+import com.example.finalproject.DataController.CyclingData
 
 @Dao
 interface CyclingDataDao {

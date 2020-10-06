@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.finalproject.DataController.CyclingDatabase
+import com.example.finalproject.DataController.DateHelper
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter
 import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
@@ -21,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        graph.gridLabelRenderer.horizontalAxisTitle = "Day"
-        graph.gridLabelRenderer.verticalAxisTitle = "Distance (Km)"
+//        graph.gridLabelRenderer.horizontalAxisTitle = "Day"
+//        graph.gridLabelRenderer.verticalAxisTitle = "Distance (Km)"
 
         graph.viewport.setMinY(0.0)
         graph.viewport.setMaxY(20.0)

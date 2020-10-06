@@ -16,25 +16,26 @@ class SecondActivy : AppCompatActivity() {
         setContentView(R.layout.activity_second_activy)
 
         showFragmentOne()
-        changFrag_btn.setOnClickListener(){
-            if(isFragmentOneLoaded){
+        changFrag_btn.setOnClickListener() {
+            if (isFragmentOneLoaded) {
                 showFragmentTwo()
-            }else{
+            } else {
                 showFragmentOne()
             }
         }
     }
 
-    private fun showFragmentOne(){
-       val transaction = manager.beginTransaction()
+    private fun showFragmentOne() {
+        changFrag_btn.text = getString(R.string.display_map)
+        val transaction = manager.beginTransaction()
         val fragment = FragmentOne()
         transaction.replace(R.id.fragment_holder, fragment)
         transaction.commit()
         isFragmentOneLoaded = true
     }
 
-    private fun showFragmentTwo(){
-        changFrag_btn.text = "Display Data"
+    private fun showFragmentTwo() {
+        changFrag_btn.text = getString(R.string.display_data)
         val transaction = manager.beginTransaction()
         val fragment = FragmentTwo()
         transaction.replace(R.id.fragment_holder, fragment)

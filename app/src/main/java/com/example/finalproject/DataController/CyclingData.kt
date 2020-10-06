@@ -1,4 +1,4 @@
-package com.example.finalproject
+package com.example.finalproject.DataController
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
