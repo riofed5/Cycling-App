@@ -8,19 +8,19 @@ import kotlinx.android.synthetic.main.activity_second_activy.*
 
 class DataRecordActivity : AppCompatActivity() {
 
-    private var isFragmentOneLoaded = true
+    private var isFragmentTwoLoaded = true
     private val manager = supportFragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second_activy)
 
-        showFragmentOne()
+        showFragmentTwo()
         changFrag_btn.setOnClickListener {
-            if (isFragmentOneLoaded) {
-                showFragmentTwo()
-            } else {
+            if (isFragmentTwoLoaded) {
                 showFragmentOne()
+            } else {
+                showFragmentTwo()
             }
         }
     }
@@ -31,7 +31,7 @@ class DataRecordActivity : AppCompatActivity() {
         val fragment = FragmentSensorData()
         transaction.replace(R.id.fragment_holder, fragment)
         transaction.commit()
-        isFragmentOneLoaded = true
+        isFragmentTwoLoaded = false
     }
 
     private fun showFragmentTwo() {
@@ -40,7 +40,7 @@ class DataRecordActivity : AppCompatActivity() {
         val fragment = FragmentMap()
         transaction.replace(R.id.fragment_holder, fragment)
         transaction.commit()
-        isFragmentOneLoaded = false
+        isFragmentTwoLoaded = true
     }
 
 }
