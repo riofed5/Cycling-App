@@ -1,6 +1,7 @@
 package com.example.finalproject.Fragments
 
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -15,6 +16,8 @@ import androidx.fragment.app.Fragment
 import com.example.finalproject.DataController.CyclingData
 import com.example.finalproject.DataController.CyclingDatabase
 import com.example.finalproject.DataController.DateHelper
+import com.example.finalproject.DataGraphActivity
+import com.example.finalproject.DataRecordActivity
 import com.example.finalproject.R
 import kotlinx.android.synthetic.main.fragment_first.*
 import kotlinx.coroutines.GlobalScope
@@ -25,6 +28,7 @@ class FragmentSensorData : Fragment() {
     private lateinit var sensorManager: SensorManager
     private var sensorAccelerometer: Sensor? = null
     private var isRunning: Boolean = false
+    private var isBackToHome: Boolean = false
     private var timeCycling = 0
     private var timeWhenStopped: Long = 0
     private var sensorDataCount: Int = 0
@@ -46,7 +50,7 @@ class FragmentSensorData : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_first, container, false)
-        Log.d("Test","On Create View: ${timeWhenStopped}")
+        Log.d("Test", "On Create View: ${timeWhenStopped}")
 
         return view
     }
@@ -70,17 +74,14 @@ class FragmentSensorData : Fragment() {
                             sqrt((event.values[0] * event.values[0] + event.values[1] * event.values[1] + event.values[2] * event.values[2]))
 
                         //Get average Speed to calculate total distance
-//                        averageSpeed -= averageSpeed / sensorDataCount
-//                        averageSpeed += magnitude / sensorDataCount
                         if (magnitude > highestSpeed) {
                             highestSpeed = magnitude.toDouble()
                         }
                         averageSpeed =
                             (averageSpeed * sensorDataCount + magnitude) / (sensorDataCount + 1)
-                        Log.d("Kqua", "$averageSpeed")
 
                         //Update current Speed to UI
-                        speedTxt.text = magnitude.toString()
+                        speedTxt.text = "%.2f".format(magnitude)
                     } else {
                         Log.d("Error", "No sensor founded")
                     }
@@ -104,8 +105,18 @@ class FragmentSensorData : Fragment() {
 
         //Btn Finish handle onClick
         finish_button.setOnClickListener {
-            handleFinishBtn()
+            if (!isBackToHome) {
+                handleFinishBtn()
+            } else {
+                handleBackToHomeBtn()
+            }
         }
+
+    }
+
+    private fun handleBackToHomeBtn() {
+        val intent = Intent(requireActivity(), DataGraphActivity::class.java)
+        requireActivity().startActivity(intent)
     }
 
     private fun handleStartBtn() {
@@ -121,6 +132,7 @@ class FragmentSensorData : Fragment() {
         //Set up chronometer
         chronometer.base = SystemClock.elapsedRealtime() + timeWhenStopped
         chronometer.start()
+
     }
 
     private fun handleStopBtn() {
@@ -136,11 +148,14 @@ class FragmentSensorData : Fragment() {
         //Calculate timeCycling
         timeCycling = calculateElapsedTime()
 
+        //Save data
         saveCyclingData()
+
     }
 
     private fun handleFinishBtn() {
         isRunning = false
+
 
         start_pause_button.text = getString(R.string.start)
 
@@ -155,11 +170,14 @@ class FragmentSensorData : Fragment() {
         chronometer.base = SystemClock.elapsedRealtime()
         timeWhenStopped = 0
 
-        //Disable Finish button
-        finish_button.isEnabled = false
-        finish_button.setBackgroundColor(requireActivity().getColor(R.color.color_disabled_Btn))
-
+        //Save data
         saveCyclingData()
+
+        //Change state of finish button
+        speedTxt.text = "0"
+        finish_button.text = requireActivity().getString(R.string.back_to_main_btn)
+        isBackToHome = true
+
     }
 
     private fun saveCyclingData() {
@@ -196,7 +214,6 @@ class FragmentSensorData : Fragment() {
     }
 
 
-
     private fun calculateElapsedTime(): Int {
         var stoppedMilliseconds = 0
 
@@ -213,27 +230,6 @@ class FragmentSensorData : Fragment() {
         }
         Log.d("Time", "$stoppedMilliseconds sec")
         return stoppedMilliseconds
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("Test","On Resume")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d("Test","On Pause")
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        Log.d("Test","On Destroy View")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("Test","On Detach")
-
     }
 
 }
