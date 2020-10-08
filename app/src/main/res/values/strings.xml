@@ -13,4 +13,6 @@
     <string name="speed_title">Speed (m/s)</string>
     <string name="time_title">Time</string>
     <string name="finish_btn">Finish</string>
+    <string name="back_to_main_btn">Back to Home</string>
+
 </resources>
